@@ -37,3 +37,39 @@ export const createUser = (req, res) => {
         .send({ message: 'Произошла ошибка' });
     });
 };
+
+export const updateUser = (req, res) => {
+  const { name, about } = req.body;
+  // Model.findByIdAndUpdate(id, { name: 'jason bourne' }, options, callback)
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+  )
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      res
+        .status(400)
+        .send({ message: 'Произошла ошибка' });
+    });
+};
+
+export const updateAvatarUser = (req, res) => {
+  const { avatar } = req.body;
+  // Model.findByIdAndUpdate(id, { name: 'jason bourne' }, options, callback)
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+  )
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      res
+        .status(400)
+        .send({ message: 'Произошла ошибка' });
+    });
+};
