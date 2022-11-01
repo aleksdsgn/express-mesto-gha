@@ -92,7 +92,7 @@ export const likeCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         responseBadRequestError(res, err.message);
       } else {
         responseServerError(res, err.message);
@@ -119,7 +119,7 @@ export const dislikeCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         responseBadRequestError(res, err.message);
       } else {
         responseServerError(res, err.message);

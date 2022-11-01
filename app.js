@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import { constants } from 'http2';
 import { router as userRouter } from './routes/users.js';
 import { router as cardRouter } from './routes/cards.js';
 
@@ -25,9 +26,15 @@ app.use((req, res, next) => {
   };
 
   // псевдоавторизация
-  if (req.headers.hasOwnProperty('authorization')) {
-    req.user._id = req.headers['authorization'];
+  if (Object.prototype.hasOwnProperty.call(req.headers, 'authorization')) {
+    req.user._id = req.headers.authorization;
   }
+
+  // в оригинале было так
+  // if (req.headers.hasOwnProperty('authorization')) {
+  //   req.user._id = req.headers['authorization'];
+  // }
+
   // или
   // if (req.headers['Authorization'] || req.headers['authorization']) {
   //   req.user._id = req.headers['Authorization'] || req.headers['authorization'];
@@ -38,6 +45,11 @@ app.use((req, res, next) => {
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
+
+// обработка неправильного пути
+app.use((req, res) => {
+  res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Путь не найден' });
+});
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
