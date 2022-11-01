@@ -1,17 +1,39 @@
+import { constants } from 'http2';
 import { Card } from '../models/card.js';
 
+// ошибка запроса
+const responseBadRequestError = (res, message) => res
+  .status(constants.HTTP_STATUS_BAD_REQUEST)
+  .send({
+    message: `Некорректные данные карточкм. ${message}`,
+  });
+
+// ошибка поиска по id
+// const responseNotFoundError = (res, message) => res
+//   .status(constants.HTTP_STATUS_NOT_FOUND)
+//   .send({
+//     message: `Карточка не найдена. ${message}`,
+//   });
+
+// ошибка сервера
+const responseServerError = (res, message) => res
+  .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+  .send({
+    message: `На сервере произошла ошибка. ${message}`,
+  });
+
+// получить все карточки
 export const getCards = (req, res) => {
   Card.find({})
     .then((cards) => {
       res.send(cards);
     })
-    .catch(() => {
-      res
-        .status(500)
-        .send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      responseServerError(res, err.message);
     });
 };
 
+// создать новую карточку
 export const createCard = (req, res) => {
   const { name, link } = req.body;
   const newCard = { name, link, owner: req.user._id };
@@ -20,25 +42,38 @@ export const createCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      console.log(err);
-      res
-        .status(400)
-        .send({ message: 'Произошла ошибка' });
+      if (err.name === 'ValidationError') {
+        responseBadRequestError(res, err.message);
+      } else {
+        responseServerError(res, err.message);
+      }
     });
 };
 
+// удаление карточки
 export const deleteCardById = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      res.send(card);
+      if (card) {
+        res.send(card);
+      } else {
+        res
+          .status(constants.HTTP_STATUS_NOT_FOUND)
+          .send({
+            message: 'Карточка не найдена.',
+          });
+      }
     })
-    .catch(() => {
-      res
-        .status(500)
-        .send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        responseBadRequestError(res, err.message);
+      } else {
+        responseServerError(res, err.message);
+      }
     });
 };
 
+// поставить лайк карточке
 export const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -46,15 +81,26 @@ export const likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      res.send(card);
+      if (card) {
+        res.send(card);
+      } else {
+        res
+          .status(constants.HTTP_STATUS_NOT_FOUND)
+          .send({
+            message: 'Карточка не найдена.',
+          });
+      }
     })
-    .catch(() => {
-      res
-        .status(500)
-        .send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        responseBadRequestError(res, err.message);
+      } else {
+        responseServerError(res, err.message);
+      }
     });
 };
 
+// убрать лайк с карточки
 export const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -62,11 +108,21 @@ export const dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      res.send(card);
+      if (card) {
+        res.send(card);
+      } else {
+        res
+          .status(constants.HTTP_STATUS_NOT_FOUND)
+          .send({
+            message: 'Карточка не найдена.',
+          });
+      }
     })
-    .catch(() => {
-      res
-        .status(500)
-        .send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        responseBadRequestError(res, err.message);
+      } else {
+        responseServerError(res, err.message);
+      }
     });
 };

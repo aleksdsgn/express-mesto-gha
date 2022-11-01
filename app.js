@@ -6,21 +6,52 @@ import { router as cardRouter } from './routes/cards.js';
 
 const { PORT = 3000 } = process.env;
 
+// обработка необработанных ошибок
+process.on('unhandledRejection', (err) => {
+  // логирование
+  console.error(err);
+  // выход из приложения с ошибкой
+  process.exit(1);
+});
+
 const app = express();
+
 app.use(bodyParser.json());
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 // временно захардкодили авторизацию
 app.use((req, res, next) => {
   req.user = {
     _id: '635e70b108c00e097deabfca',
   };
+
+  // псевдоавторизация
+  if (req.headers.hasOwnProperty('authorization')) {
+    req.user._id = req.headers['authorization'];
+  }
+  // или
+  // if (req.headers['Authorization'] || req.headers['authorization']) {
+  //   req.user._id = req.headers['Authorization'] || req.headers['authorization'];
+  // }
+
   next();
 });
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
-app.listen(PORT, () => {
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+
+const server = app.listen(PORT, () => {
   console.log(`Приложение прослушивает порт ${PORT}`);
 });
+
+// намеренная остановка сервера
+const stop = async () => {
+  await mongoose.connection.close();
+  server.close();
+  // выход из приложения без ошибки
+  process.exit(0);
+};
+
+process.on('SIGTERM', stop);
+process.on('SIGINT', stop);
