@@ -5,7 +5,7 @@ import { User } from '../models/user.js';
 const responseBadRequestError = (res, message) => res
   .status(constants.HTTP_STATUS_BAD_REQUEST)
   .send({
-    message: `Некорректные данные для пользователя. ${message}`,
+    message: 'Некорректные данные для пользователя.',
   });
 
 // ошибка поиска по id
@@ -19,7 +19,7 @@ const responseBadRequestError = (res, message) => res
 const responseServerError = (res, message) => res
   .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
   .send({
-    message: `На сервере произошла ошибка. ${message}`,
+    message: 'На сервере произошла ошибка.',
   });
 
 // получить всех пользователей

@@ -25,21 +25,6 @@ app.use((req, res, next) => {
     _id: '635e70b108c00e097deabfca',
   };
 
-  // псевдоавторизация
-  if (Object.prototype.hasOwnProperty.call(req.headers, 'authorization')) {
-    req.user._id = req.headers.authorization;
-  }
-
-  // в оригинале было так
-  // if (req.headers.hasOwnProperty('authorization')) {
-  //   req.user._id = req.headers['authorization'];
-  // }
-
-  // или
-  // if (req.headers['Authorization'] || req.headers['authorization']) {
-  //   req.user._id = req.headers['Authorization'] || req.headers['authorization'];
-  // }
-
   next();
 });
 
