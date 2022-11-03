@@ -2,7 +2,7 @@ import { constants } from 'http2';
 import { Card } from '../models/card.js';
 
 // ошибка запроса
-const responseBadRequestError = (res, message) => res
+const responseBadRequestError = (res) => res
   .status(constants.HTTP_STATUS_BAD_REQUEST)
   .send({
     message: 'Некорректные данные карточки.',
@@ -16,7 +16,7 @@ const responseBadRequestError = (res, message) => res
 //   });
 
 // ошибка сервера
-const responseServerError = (res, message) => res
+const responseServerError = (res) => res
   .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
   .send({
     message: 'На сервере произошла ошибка.',
