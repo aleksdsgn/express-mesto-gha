@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { constants } from 'http2';
 import { User } from '../models/user.js';
 
@@ -58,20 +59,21 @@ export const getUserById = (req, res) => {
 
 // добавить нового пользователя
 export const createUser = (req, res) => {
-  const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  })
+  // const {
+  //   name,
+  //   about,
+  //   avatar,
+  //   email,
+  //   password,
+  // } = req.body;
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+      email: req.body.email,
+      password: hash,
+    }))
     .then((user) => {
       res.send(user);
     })
