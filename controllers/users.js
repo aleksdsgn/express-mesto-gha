@@ -1,23 +1,31 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { constants } from 'http2';
 import { User } from '../models/user.js';
 
 // ошибка запроса
-const responseBadRequestError = (res) => res
+const responseBadRequestError400 = (res) => res
   .status(constants.HTTP_STATUS_BAD_REQUEST)
   .send({
     message: 'Некорректные данные для пользователя.',
   });
 
+// ошибка авторизации
+const responseUnauthorized401 = (res) => res
+  .status(constants.HTTP_STATUS_UNAUTHORIZED)
+  .send({
+    message: 'Неправильные почта или пароль.',
+});
+
 // ошибка поиска по id
-// const responseNotFoundError = (res, message) => res
+// const responseNotFoundError404 = (res, message) => res
 //   .status(constants.HTTP_STATUS_NOT_FOUND)
 //   .send({
 //     message: `Пользователь не найден. ${message}`,
 //   });
 
 // ошибка сервера
-const responseServerError = (res) => res
+const responseServerError500 = (res) => res
   .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
   .send({
     message: 'На сервере произошла ошибка.',
@@ -30,7 +38,7 @@ export const getUsers = (req, res) => {
       res.send(users);
     })
     .catch((err) => {
-      responseServerError(res, err.message);
+      responseServerError500(res, err.message);
     });
 };
 
@@ -50,9 +58,9 @@ export const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        responseBadRequestError(res, err.message);
+        responseBadRequestError400(res, err.message);
       } else {
-        responseServerError(res, err.message);
+        responseServerError500(res, err.message);
       }
     });
 };
@@ -79,9 +87,9 @@ export const createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError(res, err.message);
+        responseBadRequestError400(res, err.message);
       } else {
-        responseServerError(res, err.message);
+        responseServerError500(res, err.message);
       }
     });
 };
@@ -111,9 +119,9 @@ export const updateUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError(res, err.message);
+        responseBadRequestError400(res, err.message);
       } else {
-        responseServerError(res, err.message);
+        responseServerError500(res, err.message);
       }
     });
 };
@@ -142,9 +150,37 @@ export const updateAvatarUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError(res, err.message);
+        responseBadRequestError400(res, err.message);
       } else {
-        responseServerError(res, err.message);
+        responseServerError500(res, err.message);
       }
+    });
+};
+
+// вход для существующего пользователя
+export const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // аутентификация успешна! пользователь в переменной user
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      // res.send({ token });
+      // отправим токен, браузер сохранит его в куках
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .end();
+    })
+    .catch((err) => {
+      // ошибка аутентификации
+      responseUnauthorized401(res, err.message);
     });
 };

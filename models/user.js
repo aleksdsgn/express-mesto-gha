@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -30,5 +31,24 @@ const userSchema = new mongoose.Schema({
     minlength: 8,
   },
 }, { versionKey: false });
+
+userSchema.static.findUserByCredentials = function (email, password) {
+  // ищем пользователя по почте
+  return this.findne({ email }) // this — это модель User
+    .then((user) => {
+      // не нашёлся — отклоняем промис
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      // нашёлся — сравниваем хеши
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Неправильные почта или пароль'));
+          }
+          return user;
+        });
+    });
+};
 
 export const User = mongoose.model('user', userSchema);
