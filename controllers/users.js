@@ -184,3 +184,26 @@ export const login = (req, res) => {
       responseUnauthorized401(res, err.message);
     });
 };
+
+// получить информацию о текущем пользователе
+export const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user) {
+        res.send(user);
+      } else {
+        res
+          .status(constants.HTTP_STATUS_NOT_FOUND)
+          .send({
+            message: 'Пользователь не найден.',
+          });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        responseBadRequestError400(res, err.message);
+      } else {
+        responseServerError500(res, err.message);
+      }
+    });
+};
