@@ -5,6 +5,7 @@ import { constants } from 'http2';
 import { router as userRouter } from './routes/users.js';
 import { router as cardRouter } from './routes/cards.js';
 import { login, createUser } from './controllers/users.js';
+import { auth } from './middlewares/auth.js';
 
 const { PORT = 3000 } = process.env;
 
@@ -20,23 +21,22 @@ const app = express();
 
 app.use(bodyParser.json());
 
-// временно захардкодили авторизацию
-app.use((req, res, next) => {
-  req.user = {
-    _id: '635e70b108c00e097deabfca',
-  };
-
-  next();
-});
-
+// роуты, не требующие авторизации
 app.post('/signin', login);
 app.post('/signup', createUser);
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
+
+// роуты, которым авторизация нужна
+app.use('/users', auth, userRouter);
+app.use('/cards', auth, cardRouter);
 
 // обработка неправильного пути
 app.use((req, res) => {
-  res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Путь не найден' });
+  res
+    .status(constants.HTTP_STATUS_NOT_FOUND)
+    .send({ message: 'Путь не найден' });
+  // res
+  //   .status(constants.HTTP_STATUS_UNAUTHORIZED)
+  //   .send({ message: 'Неправильные почта или пароль.' });
 });
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
