@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { constants } from 'http2';
 import { router as userRouter } from './routes/users.js';
 import { router as cardRouter } from './routes/cards.js';
+import { login, createUser } from './controllers/users.js';
 
 const { PORT = 3000 } = process.env;
 
@@ -28,6 +29,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 

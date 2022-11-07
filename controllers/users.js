@@ -15,7 +15,7 @@ const responseUnauthorized401 = (res) => res
   .status(constants.HTTP_STATUS_UNAUTHORIZED)
   .send({
     message: 'Неправильные почта или пароль.',
-});
+  });
 
 // ошибка поиска по id
 // const responseNotFoundError404 = (res, message) => res
