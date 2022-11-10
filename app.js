@@ -39,6 +39,10 @@ app.use((req, res) => {
   //   .send({ message: 'Неправильные почта или пароль.' });
 });
 
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
+
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 const server = app.listen(PORT, () => {

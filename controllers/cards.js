@@ -1,40 +1,21 @@
-import { constants } from 'http2';
 import { Card } from '../models/card.js';
-
-// ошибка запроса
-const responseBadRequestError = (res) => res
-  .status(constants.HTTP_STATUS_BAD_REQUEST)
-  .send({
-    message: 'Некорректные данные карточки.',
-  });
-
-// ошибка поиска по id
-// const responseNotFoundError = (res, message) => res
-//   .status(constants.HTTP_STATUS_NOT_FOUND)
-//   .send({
-//     message: `Карточка не найдена. ${message}`,
-//   });
-
-// ошибка сервера
-const responseServerError = (res) => res
-  .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-  .send({
-    message: 'На сервере произошла ошибка.',
-  });
+import { ServerError } from '../errors/ServerError.js';
+import { NotFoundError } from '../errors/NotFoundError.js';
+import { BadRequestError } from '../errors/BadRequestError.js';
 
 // получить все карточки
-export const getCards = (req, res) => {
+export const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       res.send(cards);
     })
     .catch((err) => {
-      responseServerError(res, err.message);
+      next(new ServerError(err.message));
     });
 };
 
 // создать новую карточку
-export const createCard = (req, res) => {
+export const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const newCard = { name, link, owner: req.user._id };
   Card.create(newCard)
@@ -43,38 +24,34 @@ export const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // удаление карточки
-export const deleteCardById = (req, res) => {
+export const deleteCardById = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (card) {
         res.send(card);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Карточка не найдена.',
-          });
+        next(new NotFoundError('Карточка не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        responseBadRequestError(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // поставить лайк карточке
-export const likeCard = (req, res) => {
+export const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -84,24 +61,20 @@ export const likeCard = (req, res) => {
       if (card) {
         res.send(card);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Карточка не найдена.',
-          });
+        next(new NotFoundError('Карточка не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        responseBadRequestError(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // убрать лайк с карточки
-export const dislikeCard = (req, res) => {
+export const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // удалить _id из массива
@@ -111,18 +84,14 @@ export const dislikeCard = (req, res) => {
       if (card) {
         res.send(card);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Карточка не найдена.',
-          });
+        next(new NotFoundError('Карточка не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        responseBadRequestError(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };

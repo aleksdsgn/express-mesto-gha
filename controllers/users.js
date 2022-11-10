@@ -1,72 +1,43 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { constants } from 'http2';
 import { User } from '../models/user.js';
-
-// ошибка запроса
-const responseBadRequestError400 = (res) => res
-  .status(constants.HTTP_STATUS_BAD_REQUEST)
-  .send({
-    message: 'Некорректные данные для пользователя.',
-  });
-
-// ошибка авторизации
-const responseUnauthorized401 = (res) => res
-  .status(constants.HTTP_STATUS_UNAUTHORIZED)
-  .send({
-    message: 'Неправильные почта или пароль.',
-  });
-
-// ошибка поиска по id
-// const responseNotFoundError404 = (res, message) => res
-//   .status(constants.HTTP_STATUS_NOT_FOUND)
-//   .send({
-//     message: `Пользователь не найден. ${message}`,
-//   });
-
-// ошибка сервера
-const responseServerError500 = (res) => res
-  .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-  .send({
-    message: 'На сервере произошла ошибка.',
-  });
+import { ServerError } from '../errors/ServerError.js';
+import { NotFoundError } from '../errors/NotFoundError.js';
+import { BadRequestError } from '../errors/BadRequestError.js';
+import { UnauthorizedError } from '../errors/UnauthorizedError.js';
 
 // получить всех пользователей
-export const getUsers = (req, res) => {
+export const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
     .catch((err) => {
-      responseServerError500(res, err.message);
+      next(new ServerError(err.message));
     });
 };
 
 // получить одного пользователя по id
-export const getUserById = (req, res) => {
+export const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Пользователь не найден.',
-          });
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        responseBadRequestError400(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError500(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // добавить нового пользователя
-export const createUser = (req, res) => {
+export const createUser = (req, res, next) => {
   // const {
   //   name,
   //   about,
@@ -90,20 +61,15 @@ export const createUser = (req, res) => {
     .catch((err) => {
       console.log(req.body.password);
       if (err.name === 'ValidationError') {
-        responseBadRequestError400(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        // responseServerError500(res, err.message);
-        res
-          .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-          .send({
-            message: 'ошибка сервера при создании пользователя.',
-          });
+        next(new ServerError(err.message));
       }
     });
 };
 
 // обновить текстовые данные пользователя
-export const updateUser = (req, res) => {
+export const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   // Model.findByIdAndUpdate(id, { name: 'jason bourne' }, options, callback)
   User.findByIdAndUpdate(
@@ -118,24 +84,20 @@ export const updateUser = (req, res) => {
       if (user) {
         res.send(user);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Пользователь не найден.',
-          });
+        next(new NotFoundError('Пользователь не найден.'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError400(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError500(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // обновить аватар пользователя
-export const updateAvatarUser = (req, res) => {
+export const updateAvatarUser = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -149,24 +111,20 @@ export const updateAvatarUser = (req, res) => {
       if (user) {
         res.send(user);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Пользователь не найден.',
-          });
+        next(new NotFoundError('Пользователь не найден.'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        responseBadRequestError400(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError500(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
 
 // вход для существующего пользователя
-export const login = (req, res) => {
+export const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -189,29 +147,25 @@ export const login = (req, res) => {
     })
     .catch((err) => {
       // ошибка аутентификации
-      responseUnauthorized401(res, err.message);
+      next(new UnauthorizedError(err.message));
     });
 };
 
 // получить информацию о текущем пользователе
-export const getCurrentUser = (req, res) => {
+export const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        res
-          .status(constants.HTTP_STATUS_NOT_FOUND)
-          .send({
-            message: 'Пользователь не найден.',
-          });
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        responseBadRequestError400(res, err.message);
+        next(new BadRequestError(err.message));
       } else {
-        responseServerError500(res, err.message);
+        next(new ServerError(err.message));
       }
     });
 };
