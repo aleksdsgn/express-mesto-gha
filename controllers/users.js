@@ -82,14 +82,22 @@ export const createUser = (req, res) => {
       email: req.body.email,
       password: hash,
     }))
-    .then((user) => {
+    .then((userDocument) => {
+      const user = userDocument.toObject();
+      delete user.password;
       res.send(user);
     })
     .catch((err) => {
+      console.log(req.body.password);
       if (err.name === 'ValidationError') {
         responseBadRequestError400(res, err.message);
       } else {
-        responseServerError500(res, err.message);
+        // responseServerError500(res, err.message);
+        res
+          .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+          .send({
+            message: 'ошибка сервера при создании пользователя.',
+          });
       }
     });
 };
