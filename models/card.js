@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+const linkRegex = /^https?:\/\/.+$/;
+
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,6 +12,12 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator(url) {
+        return linkRegex.test(url);
+      },
+      message: (props) => `${props.value} Проверьте корректность ссылки`,
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

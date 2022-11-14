@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
+const avatarRegex = /^https?:\/\/.+$/;
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -18,6 +20,12 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator(url) {
+        return avatarRegex.test(url);
+      },
+      message: (props) => `${props.value} Проверьте корректность ссылки`,
+    },
   },
   email: {
     type: String,
