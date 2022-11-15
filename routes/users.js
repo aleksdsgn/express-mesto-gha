@@ -1,4 +1,9 @@
 import { Router } from 'express';
+import {
+  celebrateParamsRouteMe,
+  celebrateBodyProfile,
+  celebrateBodyAvatar,
+} from '../validators/user.js';
 
 import {
   getUsers,
@@ -10,8 +15,17 @@ import {
 
 export const router = Router();
 
+// получить всех пользователей
 router.get('/', getUsers);
-router.get('/:userId', getUserById);
-router.get('/me', getCurrentUser);
-router.patch('/me', updateUser);
-router.patch('/me/avatar', updateAvatarUser);
+
+// получить конкретного пользователя
+router.get('/:userId', celebrateParamsRouteMe, getUserById);
+
+// получить данные текущего пользователя
+router.get('/me', celebrateParamsRouteMe, getCurrentUser);
+
+// обновить данные текущего пользователя
+router.patch('/me', celebrateBodyProfile, updateUser);
+
+// обновить аватар текущего пользователя
+router.patch('/me/avatar', celebrateBodyAvatar, updateAvatarUser);

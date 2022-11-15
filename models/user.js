@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
-import validator from 'validator';
 import bcrypt from 'bcryptjs';
+// import { schemeAvatar, schemeEmail } from '../validators/user.js';
 
 const avatarRegex = /^https?:\/\/.+$/;
+const emailRegex = /^.+@.+$/;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,9 +22,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator(url) {
-        return avatarRegex.test(url);
-      },
+      // валидация через Joi
+      // validator: (value) => !schemeAvatar.validate(value).error,
+      // message: (props) => `${props.value} Проверьте корректность ссылки`,
+      // проверка регуяркой
+      validator: (value) => avatarRegex.test(value),
       message: (props) => `${props.value} Проверьте корректность ссылки`,
     },
   },
@@ -31,7 +34,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    validate: [validator.isEmail, 'Ошибка написания email'],
+    validate: {
+      // валидация через Joi
+      // validator: (value) => !schemeEmail.validate(value).error,
+      // message: (props) => `${props.value} Проверьте правильность написания почты`,
+      // проверка регуяркой
+      validator: (value) => emailRegex.test(value),
+      message: (props) => `${props.value} Проверьте правильность написания почты`,
+    },
   },
   password: {
     type: String,

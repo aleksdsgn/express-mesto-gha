@@ -2,6 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import { constants } from 'http2';
+import { errors } from 'celebrate';
+import {
+  celebrateBodyAuth,
+  celebrateBodyUser,
+} from './validators/user.js';
 import { router as userRouter } from './routes/users.js';
 import { router as cardRouter } from './routes/cards.js';
 import { login, createUser } from './controllers/users.js';
@@ -22,12 +27,15 @@ const app = express();
 app.use(bodyParser.json());
 
 // роуты, не требующие авторизации
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrateBodyAuth, login);
+app.post('/signup', celebrateBodyUser, createUser);
 
 // роуты, которым авторизация нужна
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
+
+// перехватывает ошибки и передает их наружу
+app.use(errors());
 
 // обработка неправильного пути
 app.use((req, res) => {
