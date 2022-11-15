@@ -1,4 +1,8 @@
 import { Router } from 'express';
+import {
+  celebrateBodyCard,
+  celebrateParamsRouteId,
+} from '../validators/cards.js';
 
 import {
   getCards,
@@ -10,8 +14,17 @@ import {
 
 export const router = Router();
 
+// получить все карточки
 router.get('/', getCards);
-router.post('/', createCard);
-router.delete('/:cardId', deleteCardById);
-router.put('/:cardId/likes', likeCard);
-router.delete('/:cardId/likes', dislikeCard);
+
+// добавить новую карточку
+router.post('/', celebrateBodyCard, createCard);
+
+// удалить карточку
+router.delete('/:cardId', celebrateParamsRouteId, deleteCardById);
+
+// поставить лайк карточке
+router.put('/:cardId/likes', celebrateParamsRouteId, likeCard);
+
+// удалить лайк карточке
+router.delete('/:cardId/likes', celebrateParamsRouteId, dislikeCard);

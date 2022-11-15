@@ -3,7 +3,7 @@ import {
   celebrateParamsRouteMe,
   celebrateBodyProfile,
   celebrateBodyAvatar,
-} from '../validators/user.js';
+} from '../validators/users.js';
 
 import {
   getUsers,
