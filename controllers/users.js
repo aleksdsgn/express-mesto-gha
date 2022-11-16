@@ -5,6 +5,7 @@ import { ServerError } from '../errors/ServerError.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
 import { BadRequestError } from '../errors/BadRequestError.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
+import { ConflictError } from '../errors/ConflictError.js';
 
 // получить всех пользователей
 export const getUsers = (req, res, next) => {
@@ -59,9 +60,11 @@ export const createUser = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      console.log(req.body.password);
       if (err.name === 'ValidationError') {
         next(new BadRequestError(err.message));
+        // проверка на пользователя с существующим email в БД
+      } else if (err.code === 11000) {
+        next(new ConflictError(err.message));
       } else {
         next(new ServerError(err.message));
       }
@@ -125,10 +128,13 @@ export const updateAvatarUser = (req, res, next) => {
 
 // вход для существующего пользователя
 export const login = (req, res, next) => {
+  console.log('вызываем логин');
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
+      // console.log('вызываем логин');
+
       // аутентификация успешна! пользователь в переменной user
       // создадим токен
       const token = jwt.sign(
@@ -156,7 +162,7 @@ export const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (user) {
-        res.send(user);
+        res.send({ data: user });
       } else {
         next(new NotFoundError('Пользователь не найден'));
       }

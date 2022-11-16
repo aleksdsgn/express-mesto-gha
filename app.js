@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-// import { constants } from 'http2';
+import { constants } from 'http2';
 import { errors } from 'celebrate';
 import {
   celebrateBodyAuth,
@@ -44,7 +44,9 @@ app.all('/*', (req, res, next) => {
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
+  const status = err.code || constants.HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  const message = err.message || 'Неизвестная ошибка';
+  res.status(status).send({ message });
   next();
 });
 
