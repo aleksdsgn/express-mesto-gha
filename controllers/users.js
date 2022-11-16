@@ -128,7 +128,6 @@ export const updateAvatarUser = (req, res, next) => {
 
 // вход для существующего пользователя
 export const login = (req, res, next) => {
-  console.log('вызываем логин');
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -149,7 +148,8 @@ export const login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .end();
+        // .end();
+        .send({ token });
     })
     .catch((err) => {
       // ошибка аутентификации

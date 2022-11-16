@@ -7,7 +7,7 @@ export const auth = (req, res, next) => {
 
   // убеждаемся, что он есть или начинается с Bearer
   if (!authorization || !authorization.startWith('Bearer ')) {
-    next(new UnauthorizedError('Необходима авторизация'));
+    throw new UnauthorizedError('Необходима авторизация');
   }
 
   // извлечём токен
@@ -24,5 +24,6 @@ export const auth = (req, res, next) => {
   // записываем пейлоуд в объект запроса
   req.user = payload;
 
+  // пропускаем запрос дальше
   next();
 };
