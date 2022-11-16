@@ -1,16 +1,17 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import { constants } from 'http2';
+// import { constants } from 'http2';
 import { errors } from 'celebrate';
 import {
   celebrateBodyAuth,
   celebrateBodyUser,
-} from './validators/user.js';
+} from './validators/users.js';
 import { router as userRouter } from './routes/users.js';
 import { router as cardRouter } from './routes/cards.js';
 import { login, createUser } from './controllers/users.js';
 import { auth } from './middlewares/auth.js';
+import { NotFoundError } from './errors/NotFoundError.js';
 
 const { PORT = 3000 } = process.env;
 
@@ -34,21 +35,17 @@ app.post('/signup', celebrateBodyUser, createUser);
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
 
+// обработка неправильного пути
+app.all('/*', (req, res, next) => {
+  next(new NotFoundError('Путь не найден'));
+});
+
 // перехватывает ошибки и передает их наружу
 app.use(errors());
 
-// обработка неправильного пути
-app.use((req, res) => {
-  res
-    .status(constants.HTTP_STATUS_NOT_FOUND)
-    .send({ message: 'Путь не найден' });
-  // res
-  //   .status(constants.HTTP_STATUS_UNAUTHORIZED)
-  //   .send({ message: 'Неправильные почта или пароль.' });
-});
-
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });
+  next();
 });
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
