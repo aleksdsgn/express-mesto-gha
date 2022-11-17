@@ -1,6 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+import path from 'path';
 // import { constants } from 'http2';
 import { errors } from 'celebrate';
 import {
@@ -13,7 +15,7 @@ import { login, createUser } from './controllers/users.js';
 import { auth } from './middlewares/auth.js';
 import { NotFoundError } from './errors/NotFoundError.js';
 
-const { PORT = 3000 } = process.env;
+// const { PORT = 3000 } = process.env;
 
 // обработка необработанных ошибок
 process.on('unhandledRejection', (err) => {
@@ -23,8 +25,11 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
+const config = dotenv.config({ path: path.resolve('.env.common') }).parsed;
+
 const app = express();
 
+app.set('config', config);
 app.use(bodyParser.json());
 
 // роуты, не требующие авторизации
@@ -54,10 +59,10 @@ app.use((err, req, res, next) => {
   next();
 });
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(config.DB_URL);
 
-const server = app.listen(PORT, () => {
-  console.log(`Приложение прослушивает порт ${PORT}`);
+const server = app.listen(config.PORT, () => {
+  console.log(`Приложение прослушивает порт ${config.PORT}`);
 });
 
 // намеренная остановка сервера

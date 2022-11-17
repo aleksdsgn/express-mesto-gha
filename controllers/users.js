@@ -46,17 +46,26 @@ export const createUser = (req, res, next) => {
   //   email,
   //   password,
   // } = req.body;
+  // сохранение в БД захешированного пароля пришедшего от пользователя
   bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      name: req.body.name,
-      about: req.body.about,
-      avatar: req.body.avatar,
-      email: req.body.email,
-      password: hash,
-    }))
-    .then((userDocument) => {
-      const user = userDocument.toObject();
+    .then((hash) => {
+      // замена пароля на хэш
+      req.body.password = hash;
+      // создание пользователя
+      return User.create(req.body);
+    })
+    // .then((hash) => User.create({
+    //   name: req.body.name,
+    //   about: req.body.about,
+    //   avatar: req.body.avatar,
+    //   email: req.body.email,
+    //   password: hash,
+    // }))
+    // пользователь возвращается как документ
+    .then((document) => {
+      const user = document.toObject();
       delete user.password;
+      // возвращем пользователя без пароля
       res.send(user);
     })
     .catch((err) => {
@@ -135,12 +144,8 @@ export const login = (req, res, next) => {
       // console.log('вызываем логин');
 
       // аутентификация успешна! пользователь в переменной user
-      // создадим токен
-      const token = jwt.sign(
-        { _id: user._id },
-        'some-secret-key',
-        { expiresIn: '7d' },
-      );
+      const { JWT_SALT } = req.app.get('config');
+      const token = jwt.sign({ _id: user._id }, JWT_SALT, { expiresIn: '7d' });
       // res.send({ token });
       // отправим токен, браузер сохранит его в куках
       res
