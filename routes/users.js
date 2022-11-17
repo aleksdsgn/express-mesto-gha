@@ -7,8 +7,7 @@ import {
 
 import {
   getUsers,
-  getUserById,
-  getCurrentUser,
+  getOneUser,
   updateUser,
   updateAvatarUser,
 } from '../controllers/users.js';
@@ -18,11 +17,8 @@ export const router = Router();
 // получить всех пользователей
 router.get('/', getUsers);
 
-// получить конкретного пользователя
-router.get('/:userId', celebrateParamsRouteMe, getUserById);
-
-// получить данные текущего пользователя
-router.get('/me', celebrateParamsRouteMe, getCurrentUser);
+// получить конкретного пользователя в том числе текущего
+router.get('/:userId', celebrateParamsRouteMe, getOneUser);
 
 // обновить данные текущего пользователя
 router.patch('/me', celebrateBodyProfile, updateUser);

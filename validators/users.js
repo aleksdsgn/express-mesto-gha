@@ -22,7 +22,7 @@ const schemeAbout = Joi.string().min(2).max(30);
 
 // схемы которые описывают объекты
 const schemeObjectRouteMe = Joi.object({
-  id: schemeRouteMe,
+  userId: schemeRouteMe,
 }).required();
 
 // схема обновления информации о пользователе

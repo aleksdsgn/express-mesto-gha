@@ -18,14 +18,16 @@ export const getUsers = (req, res, next) => {
     });
 };
 
-// получить одного пользователя по id
-export const getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
+// получить информацию о текущем пользователе или любом другом
+export const getOneUser = (req, res, next) => {
+  const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
+
+  User.findById(userId)
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        next(new NotFoundError('Пользователь не найден'));
+        throw new NotFoundError('Пользователь не найден');
       }
     })
     .catch((err) => {
@@ -38,14 +40,7 @@ export const getUserById = (req, res, next) => {
 };
 
 // добавить нового пользователя
-export const createUser = (req, res, next) => {
-  // const {
-  //   name,
-  //   about,
-  //   avatar,
-  //   email,
-  //   password,
-  // } = req.body;
+export const register = (req, res, next) => {
   // сохранение в БД захешированного пароля пришедшего от пользователя
   bcrypt.hash(req.body.password, 10)
     .then((hash) => {
@@ -54,13 +49,6 @@ export const createUser = (req, res, next) => {
       // создание пользователя
       return User.create(req.body);
     })
-    // .then((hash) => User.create({
-    //   name: req.body.name,
-    //   about: req.body.about,
-    //   avatar: req.body.avatar,
-    //   email: req.body.email,
-    //   password: hash,
-    // }))
     // пользователь возвращается как документ
     .then((document) => {
       const user = document.toObject();
@@ -80,10 +68,33 @@ export const createUser = (req, res, next) => {
     });
 };
 
+// вход для существующего пользователя
+export const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // аутентификация успешна! пользователь в переменной user
+      const { JWT_SALT } = req.app.get('config');
+      const token = jwt.sign({ _id: user._id }, JWT_SALT, { expiresIn: '7d' });
+
+      // отправим токен, браузер сохранит его в куках
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .send({ token });
+    })
+    .catch((err) => {
+      // ошибка аутентификации
+      next(new UnauthorizedError(err.message));
+    });
+};
+
 // обновить текстовые данные пользователя
 export const updateUser = (req, res, next) => {
   const { name, about } = req.body;
-  // Model.findByIdAndUpdate(id, { name: 'jason bourne' }, options, callback)
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
@@ -128,52 +139,6 @@ export const updateAvatarUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
-      } else {
-        next(new ServerError(err.message));
-      }
-    });
-};
-
-// вход для существующего пользователя
-export const login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      // console.log('вызываем логин');
-
-      // аутентификация успешна! пользователь в переменной user
-      const { JWT_SALT } = req.app.get('config');
-      const token = jwt.sign({ _id: user._id }, JWT_SALT, { expiresIn: '7d' });
-      // res.send({ token });
-      // отправим токен, браузер сохранит его в куках
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        })
-        // .end();
-        .send({ token });
-    })
-    .catch((err) => {
-      // ошибка аутентификации
-      next(new UnauthorizedError(err.message));
-    });
-};
-
-// получить информацию о текущем пользователе
-export const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
         next(new BadRequestError(err.message));
       } else {
         next(new ServerError(err.message));
