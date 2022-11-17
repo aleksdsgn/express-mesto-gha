@@ -43,8 +43,14 @@ app.use('*', (req, res, next) => {
 // перехватывает ошибки и передает их наружу
 app.use(errors());
 
+// app.use((err, req, res, next) => {
+//   res.status(err.statusCode).send({ message: err.message });
+//   next();
+// });
 app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
+  const status = err.statusCode || 500;
+  const message = status === 500 ? 'Ошибка на сервере' : err.message;
+  res.status(status).send({ message });
   next();
 });
 

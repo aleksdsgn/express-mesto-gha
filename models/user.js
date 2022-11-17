@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 // import { schemeAvatar, schemeEmail } from '../validators/user.js';
+import { UnauthorizedError } from '../errors/UnauthorizedError.js';
 
 const avatarRegex = /^https?:\/\/.+$/;
 const emailRegex = /^.+@.+$/;
@@ -54,17 +55,20 @@ const userSchema = new mongoose.Schema({
 userSchema.statics.findUserByCredentials = function (email, password) {
   // ищем пользователя по почте
   return this.findOne({ email }).select('+password') // this — это модель User
-    .then((user) => {
+    .then((document) => {
       // не нашёлся — отклоняем промис
-      if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+      if (!document) {
+        throw new UnauthorizedError('Неправильные почта или пароль');
       }
       // нашёлся — сравниваем хеши
-      return bcrypt.compare(password, user.password)
+      return bcrypt.compare(password, document.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            throw new UnauthorizedError('Неправильные почта или пароль');
           }
+
+          const user = document.toObject();
+          delete user.password;
           return user;
         });
     });
