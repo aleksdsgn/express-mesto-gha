@@ -27,7 +27,7 @@ export const getOneUser = (req, res, next) => {
       if (user) {
         res.send(user);
       } else {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
