@@ -8,7 +8,7 @@ import { ForbiddenError } from '../errors/ForbiddenError.js';
 export const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.send(cards);
+      res.send({ data: cards });
     })
     .catch((err) => {
       next(new ServerError(err.message));
@@ -24,7 +24,7 @@ export const createCard = (req, res, next) => {
 
   Card.create(newCard)
     .then((card) => {
-      res.send(card);
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -86,7 +86,7 @@ export const likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (card) {
-        res.send(card);
+        res.send({ data: card });
       } else {
         next(new NotFoundError('Карточка не найдена.'));
       }
@@ -109,7 +109,7 @@ export const dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (card) {
-        res.send(card);
+        res.send({ data: card });
       } else {
         next(new NotFoundError('Карточка не найдена.'));
       }

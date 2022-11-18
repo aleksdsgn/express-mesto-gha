@@ -45,10 +45,9 @@ app.use('*', (req, res, next) => {
 // перехватывает ошибки и передает их наружу
 app.use(errors());
 
+// централизованный обработчик ошибок
 app.use((err, req, res, next) => {
-  const status = err.statusCode || 500;
-  const message = status === 500 ? 'Ошибка на сервере' : err.message;
-  res.status(status).send({ message });
+  res.status(err.statusCode).send({ message: err.message });
   next();
 });
 

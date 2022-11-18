@@ -6,7 +6,7 @@ import {
 } from './common.js';
 
 export const schemeRouteId = schemeObjectId;
-export const schemeName = Joi.string().min(2).max(30);
+export const schemeName = Joi.string().min(2).max(30).required();
 
 export const schemeObjectRouteId = Joi.object({
   cardId: schemeRouteId,
@@ -15,7 +15,7 @@ export const schemeObjectRouteId = Joi.object({
 // обязательно как сама ссылка так и сам объект со ссылкой
 export const schemaObjectCard = Joi.object({
   name: schemeName,
-  link: schemeURL,
+  link: schemeURL.required(),
 });
 
 // сегменты из схем
