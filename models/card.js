@@ -13,9 +13,8 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator(url) {
-        return linkRegex.test(url);
-      },
+      // проверка регуяркой
+      validator: (value) => linkRegex.test(value),
       message: (props) => `${props.value} Проверьте корректность ссылки`,
     },
   },
