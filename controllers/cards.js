@@ -10,8 +10,8 @@ export const getCards = (req, res, next) => {
     .then((cards) => {
       res.send({ data: cards });
     })
-    .catch((err) => {
-      next(new ServerError(err.message));
+    .catch(() => {
+      next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
@@ -28,9 +28,9 @@ export const createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -51,7 +51,7 @@ export const deleteCardById = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('тут Bad Request какой-то'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -93,9 +93,9 @@ export const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -116,9 +116,9 @@ export const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };

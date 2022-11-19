@@ -13,8 +13,8 @@ export const getUsers = (req, res, next) => {
     .then((users) => {
       res.send(users);
     })
-    .catch((err) => {
-      next(new ServerError(err.message));
+    .catch(() => {
+      next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
@@ -33,9 +33,9 @@ export const getCurrentUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -54,9 +54,9 @@ export const getOneUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -80,12 +80,12 @@ export const register = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
         // проверка на пользователя с существующим email в БД
       } else if (err.code === 11000) {
-        next(new ConflictError(err.message));
+        next(new ConflictError('Такой email уже зарегистрирован'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -108,9 +108,9 @@ export const login = (req, res, next) => {
         })
         .send({ token });
     })
-    .catch((err) => {
+    .catch(() => {
       // ошибка аутентификации
-      next(new UnauthorizedError(err.message));
+      next(new UnauthorizedError('Неправильные почта или пароль'));
     });
 };
 
@@ -134,9 +134,9 @@ export const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
@@ -161,9 +161,9 @@ export const updateAvatarUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        next(new ServerError(err.message));
+        next(new ServerError('Произошла ошибка на сервере'));
       }
     });
 };
