@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { constants } from 'http2';
@@ -21,6 +22,7 @@ const app = express();
 
 app.set('config', config);
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // подключение всех роутов
 app.use(router);
@@ -30,7 +32,7 @@ app.use(errors());
 
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
-  const status = err.status || constants.HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  const status = err.statusCode || constants.HTTP_STATUS_INTERNAL_SERVER_ERROR;
   const message = err.message || 'Произошла неизвестная ошибка';
   res.status(status).send({ message });
   next();
