@@ -7,6 +7,7 @@ import {
 
 import {
   getUsers,
+  getCurrentUser,
   getOneUser,
   updateUser,
   updateAvatarUser,
@@ -18,7 +19,7 @@ export const router = Router();
 router.get('/', getUsers);
 
 // получить текущего пользователя
-router.get('/me', celebrateParamsRouteMe, getOneUser);
+router.get('/me', getCurrentUser);
 
 // получить конкретного пользователя в том числе текущего
 router.get('/:userId', celebrateParamsRouteMe, getOneUser);
