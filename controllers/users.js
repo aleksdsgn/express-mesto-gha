@@ -18,13 +18,10 @@ export const getUsers = (req, res, next) => {
     });
 };
 
-// получить информацию о текущем пользователе
-export const getCurrentUser = (req, res, next) => {
-  // const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
-  console.log('getCurrentUser');
-  User.findById(req.user._id)
+// общая логика получения информацию о пользователе
+const getUserData = (id, res, next) => {
+  User.findById(id)
     .then((user) => {
-      console.log('getCurrentUser');
       if (user) {
         res.send(user);
       } else {
@@ -40,25 +37,14 @@ export const getCurrentUser = (req, res, next) => {
     });
 };
 
-// получить информацию о текущем пользователе или любом другом
-export const getOneUser = (req, res, next) => {
-  // const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
+// получить информацию о текущем пользователе
+export const getCurrentUser = (req, res, next) => {
+  getUserData(req.user._id, res, next);
+};
 
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else {
-        next(new ServerError('Произошла ошибка на сервере'));
-      }
-    });
+// получить информацию о любом другом пользователе
+export const getOneUser = (req, res, next) => {
+  getUserData(req.params.userId, res, next);
 };
 
 // добавить нового пользователя
