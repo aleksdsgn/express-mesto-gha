@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 // import { schemeAvatar, schemeEmail } from '../validators/user.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
+import { linkRegex } from '../validators/common.js';
 
-export const linkRegex = /^https?:\/\/(www.)?[0-9A-Za-z-]+\.[0-9A-Za-z]+[\w-._~:/?#[\]@!$'()*+,;=]*#?/;
 const emailRegex = /^.+@.+$/;
 
 const userSchema = new mongoose.Schema({

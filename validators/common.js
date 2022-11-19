@@ -1,5 +1,7 @@
 import { Joi, celebrator } from 'celebrate';
 
+export const linkRegex = /^https?:\/\/(www.)?[0-9A-Za-z-]+\.[0-9A-Za-z]+[\w-._~:/?#[\]@!$'()*+,;=]*#?/;
+
 // конфиг для celebrate
 export const celebrate = celebrator(
   // настройка для celebrate
@@ -17,4 +19,4 @@ export const celebrate = celebrator(
 export const schemeObjectId = Joi.string().hex().length(24);
 
 // проверка на url-ы
-export const schemeURL = Joi.string().uri({ scheme: ['http', 'https'] });
+export const schemeURL = Joi.string().pattern(linkRegex);
