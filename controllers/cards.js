@@ -42,14 +42,17 @@ export const deleteCardById = (req, res, next) => {
       if (document) {
         const card = document.toObject();
         if (card.owner.toString() === req.user._id) {
-          document.remove();
-          res.send({ data: card });
+          document.remove()
+            .then(() => {
+              res.send({ data: card });
+            })
+            .catch(next);
         } else next(new ForbiddenError('Удалить можно только свои карточки'));
       } else next(new NotFoundError('Карточка не найдена'));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('тут Bad Request какой-то'));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
         next(new ServerError('Произошла ошибка на сервере'));
       }
