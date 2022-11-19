@@ -4,15 +4,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { errors } from 'celebrate';
-import {
-  celebrateBodyAuth,
-  celebrateBodyUser,
-} from './validators/users.js';
-import { router as userRouter } from './routes/users.js';
-import { router as cardRouter } from './routes/cards.js';
-import { login, register } from './controllers/users.js';
-import { auth } from './middlewares/auth.js';
-import { NotFoundError } from './errors/NotFoundError.js';
+import { router } from './routes/index.js';
 
 // обработка необработанных ошибок
 process.on('unhandledRejection', (err) => {
@@ -29,18 +21,8 @@ const app = express();
 app.set('config', config);
 app.use(bodyParser.json());
 
-// роуты, не требующие авторизации
-app.post('/signin', celebrateBodyAuth, login);
-app.post('/signup', celebrateBodyUser, register);
-
-// роуты, которым авторизация нужна
-app.use('/users', auth, userRouter);
-app.use('/cards', auth, cardRouter);
-
-// обработка неправильного пути
-app.use('*', (req, res, next) => {
-  next(new NotFoundError('Путь не найден'));
-});
+// подключение всех роутов
+app.use(router);
 
 // перехватывает ошибки и передает их наружу
 app.use(errors());
