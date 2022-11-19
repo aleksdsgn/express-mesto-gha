@@ -18,11 +18,33 @@ export const getUsers = (req, res, next) => {
     });
 };
 
+// получить информацию о текущем пользователе
+export const getCurrentUser = (req, res, next) => {
+  // const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
+  console.log('getCurrentUser');
+  User.findById(req.user._id)
+    .then((user) => {
+      console.log('getCurrentUser');
+      if (user) {
+        res.send(user);
+      } else {
+        next(new NotFoundError('Пользователь не найден'));
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError(err.message));
+      } else {
+        next(new ServerError(err.message));
+      }
+    });
+};
+
 // получить информацию о текущем пользователе или любом другом
 export const getOneUser = (req, res, next) => {
-  const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
+  // const userId = (req.params.userId === 'me') ? req.user._id : req.params.userId;
 
-  User.findById(userId)
+  User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         res.send(user);

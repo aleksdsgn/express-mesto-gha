@@ -17,6 +17,9 @@ export const router = Router();
 // получить всех пользователей
 router.get('/', getUsers);
 
+// получить текущего пользователя
+router.get('/me', celebrateParamsRouteMe, getOneUser);
+
 // получить конкретного пользователя в том числе текущего
 router.get('/:userId', celebrateParamsRouteMe, getOneUser);
 
