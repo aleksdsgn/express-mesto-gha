@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import { constants } from 'http2';
 import { errors } from 'celebrate';
 import { router } from './routes/index.js';
 
@@ -29,7 +30,9 @@ app.use(errors());
 
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
+  const status = err.status || constants.HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  const message = err.message || 'Произошла неизвестная ошибка';
+  res.status(status).send({ message });
   next();
 });
 
