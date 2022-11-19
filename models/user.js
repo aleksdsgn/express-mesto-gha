@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 // import { schemeAvatar, schemeEmail } from '../validators/user.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
 
-const avatarRegex = /^https?:\/\/.+$/;
+export const linkRegex = /^https?:\/\/(www.)?[0-9A-Za-z-]+\.[0-9A-Za-z]+[\w-._~:/?#[\]@!$'()*+,;=]*#?/;
 const emailRegex = /^.+@.+$/;
 
 const userSchema = new mongoose.Schema({
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
       // validator: (value) => !schemeAvatar.validate(value).error,
       // message: (props) => `${props.value} Проверьте корректность ссылки`,
       // проверка регуяркой
-      validator: (value) => avatarRegex.test(value),
+      validator: (value) => linkRegex.test(value),
       message: (props) => `${props.value} Проверьте корректность ссылки`,
     },
   },

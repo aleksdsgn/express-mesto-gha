@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-
-const linkRegex = /^https?:\/\/.+$/;
+import { linkRegex } from './user.js';
 
 const cardSchema = new mongoose.Schema({
   name: {
