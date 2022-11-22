@@ -7,6 +7,7 @@ import path from 'path';
 import { constants } from 'http2';
 import { errors } from 'celebrate';
 import { router } from './routes/index.js';
+import { requestLogger, errorLogger } from './middlewares/logger.js';
 
 // обработка необработанных ошибок
 process.on('unhandledRejection', (err) => {
@@ -23,11 +24,14 @@ const app = express();
 app.set('config', config);
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(requestLogger);
 
 // подключение всех роутов
 app.use(router);
 
-// перехватывает ошибки и передает их наружу
+app.use(errorLogger);
+
+// обработчик ошибок celebrate. перехватывает и передает их наружу
 app.use(errors());
 
 // централизованный обработчик ошибок
